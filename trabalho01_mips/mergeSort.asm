@@ -3,6 +3,11 @@
 
 main:
 
+	
+	jal bubble
+	
+	li $v0,10
+	syscall
 
 	bubble:
 
@@ -17,7 +22,7 @@ main:
 
 	lw $t3,size
 	la $t1,list	  #passa pra t1 o endereço de lista
-	
+		
 
 	lw $s3,size
 	add $s3,$s3,-1
@@ -114,14 +119,12 @@ main:
 	la $a0,msg
 	syscall
 
-
-	li $v0,10
-	syscall
+	jr	$ra
 
 	.data
 
 msg:    .asciiz   "Teste\n"
 size:	.word	  10
-list:   .word     13,23,2,17,5,11,19,3,29
+list:   .word     13,23,2,17,5,11,19,3,29,1
 espaco: .asciiz   " "
 pulalinha: .asciiz   "\n"
