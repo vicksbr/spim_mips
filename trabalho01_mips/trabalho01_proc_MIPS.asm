@@ -19,15 +19,16 @@ main:
 	la $a0, origlist
 	lw $a1, size		
 	jal print_function		
-	
+
 	li $v0,4
 	la $a0,pulalinha
 	syscall
 	
-	jal bubble	
-
 	la $a0, list
 	lw $a1, size	
+	
+	#jal bubble
+	jal merge
 	
 	jal print_function		
 
@@ -47,10 +48,10 @@ bubble:
 	sw $t2,4($sp)
 	sw $t3,0($sp)
 
-	lw $t3,size
-	la $t1,list	  			
+	move $t3,$a1
+	move $t1,$a0	  			
 
-	lw $s3,size
+	move $s3,$a1
 	add $s3,$s3,-1
 
 	outer: #    loop externo
@@ -164,7 +165,7 @@ merge:
 	sub $a0, $t0, 1
 	jal merge
 
-	move $t1,$v0  #passa o resultado de merge(n)
+	move $t1,$v0     #passa o resultado de merge(n)
 	lw $t0,20($sp)
 
 	add $v0, $t0, $t1
