@@ -4,8 +4,8 @@
 msg:    	.asciiz   "Teste\n"
 msg2:		.asciiz   "Outro teste\n"
 size:		.word	  16
-list:   	.word     13,23,2,17,5,11,19,3,29,1
-auxlist:    .word     0,0,0,0,0,0,0,0,0,0
+list:   	.word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68
+origlist:   .word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68
 espaco: 	.asciiz   " "
 pulalinha:  .asciiz   "\n"
 
@@ -16,22 +16,20 @@ pulalinha:  .asciiz   "\n"
 
 main:
 
-	#jal bubble	
-
-	la $a0,10
-	#lw $a1, size	
-	
-	#jal print_function		
-
-	jal merge
-	move $t0,$v0
+	la $a0, origlist
+	lw $a1, size		
+	jal print_function		
 	
 	li $v0,4
 	la $a0,pulalinha
 	syscall
 	
-	la $a0,msg
-	syscall
+	jal bubble	
+
+	la $a0, list
+	lw $a1, size	
+	
+	jal print_function		
 
 	li $v0,10
 	syscall
@@ -55,7 +53,7 @@ bubble:
 	lw $s3,size
 	add $s3,$s3,-1
 
-	outer:
+	outer: #    loop externo
 
 		bge $zero,$s3,outer_end	
 		li $s0,0  			   	#	contador do loop		   
@@ -63,7 +61,7 @@ bubble:
 
 		inner:
 
-			bge $s0,$s3,inner_end
+			bge $s0,$s3,inner_end   #loop intero 
 			lw $t7,list($s1)
 			lw $t8,list + 4($s1)
 
@@ -85,19 +83,19 @@ bubble:
 	outer_end:
 
 		lw 	$ra, 24($sp)
-		lw	$s0, 20($sp)	# restore $s0 from the stack	
-		lw	$s1, 16($sp)	# restore $s1 from the stack	
-		lw	$s3, 12($sp)    # restore $s3 from the stack	
+		lw	$s0, 20($sp)	# restaura os valores da pilha	
+		lw	$s1, 16($sp)		
+		lw	$s3, 12($sp)    	
     	lw  $t1, 8($sp)
 		lw  $t2, 4($sp)
 		lw  $t3, 0($sp)
-		addi $sp, $sp, 28	# restore stack pointer			
+		addi $sp, $sp, 28				
 		jr	$ra
 
 	endbubble:		
 	 
 	
-print_function:
+print_function:         #funcao simples que printa um array contido em $a0 de tamanho $a1
 	
 	addi $sp, $sp, -16
 	sw   $ra, 12($sp)
