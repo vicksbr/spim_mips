@@ -3,14 +3,14 @@
 
 main:
 
-	#jal bubble
+	jal bubble
 
 	la $a0,list
 	lw $a1, size
 	
-	#jal print_function	
+	jal print_function	
 
-	jal merge
+	#jal merge
 
 	li $v0,4
 	la $a0,pulalinha
