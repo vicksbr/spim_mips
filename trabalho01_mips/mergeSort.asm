@@ -1,17 +1,31 @@
+	
+	.data
+
+msg:    	.asciiz   "Teste\n"
+msg2:		.asciiz   "Outro teste\n"
+size:		.word	  16
+list:   	.word     13,23,2,17,5,11,19,3,29,1
+auxlist:    .word     0,0,0,0,0,0,0,0,0,0
+espaco: 	.asciiz   " "
+pulalinha:  .asciiz   "\n"
+
 	.text
 	.globl main
 
+
+
 main:
 
-	jal bubble
+	#jal bubble	
 
-	la $a0,list
-	lw $a1, size
+	la $a0,10
+	#lw $a1, size	
 	
-	jal print_function	
+	#jal print_function		
 
-	#jal merge
-
+	jal merge
+	move $t0,$v0
+	
 	li $v0,4
 	la $a0,pulalinha
 	syscall
@@ -80,9 +94,7 @@ bubble:
 		addi $sp, $sp, 28	# restore stack pointer			
 		jr	$ra
 
-	endbubble:
-
-		
+	endbubble:		
 	 
 	
 print_function:
@@ -141,44 +153,33 @@ print_function:
 merge:
 
 
-	addi $sp,$sp,-40
-	sw $ra, 36($sp)
-	sw $a0, 32($sp)
-	sw $t0,	28($sp)
-	sw $t1, 24($sp)
-	sw $t2, 20($sp)
-	sw $t3, 16($sp)
-	sw $t4, 12($sp)
-	sw $t5, 8($sp)
-	sw $t6, 4($sp)
-	sw $t7, 0($sp)
+	addi $sp,$sp,-32
+	sw $ra, 28($sp)
+	sw $fp, 24($sp)
+	addi $fp, $sp, 32
 	
-	#jal merge
+	move $t0,$a0
+	blt $t0,1,caso_basico
 
-	lw $ra, 36($sp)
-	lw $a0, 32($sp)
-	lw $t0,	28($sp)
-	lw $t1, 24($sp)
-	lw $t2, 20($sp)
-	lw $t3, 16($sp)
-	lw $t4, 12($sp)
-	lw $t5, 8($sp)
-	lw $t6, 4($sp)
-	lw $t7, 0($sp)
-	addi $sp,$sp,40
+	sw $t0,20($sp)
+
+	sub $a0, $t0, 1
+	jal merge
+
+	move $t1,$v0  #passa o resultado de merge(n)
+	lw $t0,20($sp)
+
+	add $v0, $t0, $t1
+	b endmerge
+
+caso_basico:
+	li $v0,1	
 
 endmerge:
-
+	lw $ra, 28($sp)
+	lw $fp, 24($sp)
+	addu $sp, $sp, 32
 	jr $ra
 
+	
 
-
-	.data
-
-msg:    	.asciiz   "Teste\n"
-msg2:		.asciiz   "Outro teste\n"
-size:		.word	  16
-list:   	.word     13,23,2,17,5,11,19,3,29,1
-auxlist:    .word     0,0,0,0,0,0,0,0,0,0
-espaco: 	.asciiz   " "
-pulalinha:  .asciiz   "\n"
