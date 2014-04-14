@@ -10,7 +10,7 @@ n:	.word	10
 	.globl main
 main:
 	lw $t0, n		# $t0 contains n
-	la $a0, array		# $a0 contains address of array
+	la $a0, array	# $a0 contains address of array
 	li $a1, 0		# $a1 contains starting index to sort (low)
 	addi $a2,$t0,-1 	# $a2 contains ending index to sort (high)
 	jal	mergeSort	
