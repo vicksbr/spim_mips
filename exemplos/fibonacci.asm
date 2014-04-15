@@ -4,7 +4,7 @@
 	main:
 
 
-		li $a0,10
+		lw $a0,tamanho
 		
 		jal fib
 		move $a0,$v0
@@ -19,6 +19,8 @@
 		endMain:
 
 	fib:
+
+		#$t0 recebe $a0 (n)
 
 		addi $sp, $sp, -32
 		sw   $ra, 28($sp)
@@ -67,6 +69,9 @@
 
 
 
+	.data
+
+tamanho: .word 10
 
 
 
