@@ -4,20 +4,18 @@
 
 
 main:
-
-	#somaAateB($a0,$a1)
 	
 
 	li $a0,2
 	li $a1,4
 	jal somaAateB
-	move $t7,$v0
+	move $t7,$v0	#$t7 = somaAateB($a0,$a1)
 
-	#fibonnaci($a0)
 	
 	li $a0,6
 	jal fibonacci
-	move $t6,$v0
+	move $t6,$v0 	#$t6 = fibonnaci($a0)
+	
 
 
 	li $v0,4
@@ -26,9 +24,6 @@ main:
 
 	li $v0,10
 	syscall
-
-
-
 
 
 	#	int somaAateB(int a, int b) {   
