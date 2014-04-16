@@ -63,7 +63,7 @@ main:
 
 	la $a0, list
 	lw $a1, size	
-	jal merge
+	jal mergeSort
 	
 	#passando os parametros e chamando printando o vetor ordenado
 
