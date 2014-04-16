@@ -1,41 +1,76 @@
+#----------------------------------------------------------------------
+#	Merge Sort em assembly MIPS					  					   
+#												  					   
+# 	download disponivel no github				  				       
+#	https://github.com/vicksbr/spim_mips/tree/master/trabalho01_mips   
+#																	   
+#																	   
+
+
+#-------------------------------------------
+# LABELS     								
+#-------------------------------------------
+
 	.data
 
-msg:    	.asciiz   "Teste\n"
-msg2:		.asciiz   "Outro teste\n"
+ord_msg:    .asciiz  "Vetor ordenado: "
+nord_msg:	.asciiz  "Vetor desordenado: "
 espaco: 	.asciiz   " "
 pulalinha:  .asciiz   "\n"
 
 	.align 2
 size:		.word	  16
 list:   	.word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68
+list_old:   .word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68
 vetor_tmp:  .word     1
-list_ord:   .word     1
 
 
 	.text
 	.globl main
 
+
+#-------------------------------------------
+# Main     									
+#-------------------------------------------
+
+
 main:
 
-	#la $a0, origlist
-	#lw $a1, size		
-	#jal print_function		
+	#passando os parametros e chamando printando o vetor desordenado
 
-	#li $v0,4
-	#la $a0,pulalinha
-	#syscall
+	la $a0,nord_msg
+	syscall
 	
+	la $a0, list_old
+	lw $a1, size		
+	jal print_function		
+
+	li $v0,4
+	la $a0,pulalinha
+	syscall
+	
+
+	#alocação de espaço para o vetor temporario
+
 	li $v0, 9
     lw $a0, size
     li $t7, 4
     mul $a0, $a0, $t7
-    syscall     #alloca "tam" bytes e retorna o ponteiro pro primeiro em v0
-    sw $v0,vetor_tmp     #vetor_aux passa a apontar para o início do vetor alocado na linha acima
+    syscall     
+    sw $v0,vetor_tmp     
+
+	#passando os parametros e chamando merge
 
 	la $a0, list
 	lw $a1, size	
 	jal merge
 	
+	#passando os parametros e chamando printando o vetor ordenado
+
+	li $v0,4
+	la $a0,ord_msg
+	syscall
+
 	la $a0, list
 	lw $a1, size
 	jal print_function		
@@ -45,66 +80,87 @@ main:
 
 	endMain:
 
+#-------------------------------------------
+# FUNCOES									
+#-------------------------------------------
+
+
+#-------------------------------------------
+#	bubble(*a0,a1)						 	
+#	aplica o bubble sort no vetor passado	
+#											
+#	entradas								
+#	$a0 endereço para o começo do vetor     
+#   $a1 tamanho do vetor 					
+#-------------------------------------------
+
+	.text
+	.globl bubble
+
+
 bubble:
 
-	addi $sp, $sp, -32		#	passa pra t1 o endereço de lista	
+	addi $sp, $sp, -32		
 	sw $ra,28($sp)
-	sw $s0,24($sp)
-	sw $s1,20($sp)
-	sw $s2,16($sp)
-	sw $s3,12($sp)
-	sw $t1,8($sp)
-	sw $t2,4($sp)
-	sw $t3,0($sp)
+	sw $s0,24($sp)					#	$s0 sera o contador do loop inner   
+	sw $s1,20($sp)					#	$s1 recebera o começo do vetor      
+	sw $s2,16($sp)					#   $s2 sera o contador do loop outer   
+	sw $s3,12($sp)					# 	$s3 recebera o tamanho				
+	
+	move $s3,$a1					#   copia para $s3 o tamanho do vetor       
+	add $s3,$s3,-1                  #	decrementa o tamanho pois fara i-1 vezes
 
-	move $s3,$a1
-	add $s3,$s3,-1
+	li $s2, 0						#   setando o contador j para 0
+	outer: 							#   loop externo
 
-	li $s2, 0
-	outer: #    loop externo
-
-		bge $s2,$s3,outer_end	
-		li $s0,0  			   	#	contador do loop interno	   
-		move $s1, $a0			#	posicao dentro do array (i)						
+		bge  $s2,$s3,outer_end	
+		li   $s0,0  			   	#	$s0 contador do loop interno	   					
+		move $s1, $a0				#	$s1 recebe o endereço do começo do vetor			
 
 		inner:
 
-			bge $s0,$s3,inner_end   #loop intero 
-			lw $t7,($s1)
+			bge $s0,$s3,inner_end   #	loop interno										
+			lw $t7,($s1)			# 	coloca em t7 e t8 as palavras v[i] e v[i+]			
 			lw $t8,4($s1)
 
-			ble $t7,$t8,no_swap
+			ble $t7,$t8,no_swap 	#	caso nao entrar no "no_swap" realizar a troca  		
 			sw 	$t8,($s1)
 			sw  $t7,4($s1)
 
 	no_swap:
 
-		addi $s1,$s1,4
-		addi $s0,$s0,1
+		addi $s1,$s1,4				#	incrementa 4 bytes p/ passar para prox posicao no vetor
+		addi $s0,$s0,1 				#	incrementa o contador do loop interno (j)
 		j inner
 
 		inner_end:
 
-		add $s2, $s2, 1
+		add $s2, $s2, 1             #	incrementa o contador do loop externo (i)
 		j outer
 
 	outer_end:
 
 		lw 	$ra, 28($sp)
 		lw 	$s0, 24($sp)
-		lw	$s1, 20($sp)	# restaura os valores da pilha	
+		lw	$s1, 20($sp)			
 		lw	$s2, 16($sp)		
 		lw	$s3, 12($sp)    	
-    	lw  $t1, 8($sp)
-		lw  $t2, 4($sp)
-		lw  $t3, 0($sp)
-		addi $sp, $sp, 32				
+    	addi $sp, $sp, 32				
 		jr	$ra
 
 
-	 
-	
-print_function:         #funcao simples que printa um array contido em $a0 de tamanho $a1
+#-------------------------------------------------
+#	Printa um array contido em $a0 de tamanho $a1 
+#												  
+#	entradas: 									  
+#	$a0	 endereço para o começo da lista 		  
+#   $a1  tamanho								  
+#------------------------------------------------ 
+
+	.text
+	.globl print_function
+
+print_function:         
 	
 	addi $sp, $sp, -16
 	sw   $ra, 12($sp)
@@ -112,24 +168,25 @@ print_function:         #funcao simples que printa um array contido em $a0 de ta
 	sw   $t2, 4($sp)
 	sw   $t3, 0($sp)
 
-	move $t1, $a0	  	#	passa pra t1 o endereço de lista				
-	move $t3, $a1    	#	passa pra t1 o argumento com o tamanho da lista 
-	li $t2,0      		#	loop counter									
+	move $t1, $a0	  				#	passa pra t1 o endereço de lista				
+	move $t3, $a1    				#	passa pra t1 o argumento com o tamanho da lista 
+	li $t2,0      					#	loop counter									
 	
 
 	print_loop:
 	
-		beq $t2,$t3,print_loop_end
-		lw $a0,($t1)
-		li $v0,1
+		beq $t2,$t3,print_loop_end  #	condição para o fim do loop
+		lw $a0,($t1)				#	carrega o parametro para escrever
+		
+		li $v0,1         		  	#	printa o numero
 		syscall
 
-		li $v0,4
+		li $v0,4					#	printa um espaço
 		la $a0,espaco
 		syscall
 
-		addi $t2,$t2,1    #	incremento no para o loop	
-		addi $t1,$t1,4    #	avançando no array		 	
+		addi $t2,$t2,1    			#	incremento no para o loop	
+		addi $t1,$t1,4    			#	avançando no array		 	
 
 		j 	print_loop
 
@@ -141,9 +198,48 @@ print_function:         #funcao simples que printa um array contido em $a0 de ta
 		lw   $t2, 4($sp)
 		lw   $t3, 0($sp)
 
-		addi $sp, $sp, 16		# restore stack pointer	
+		addi $sp, $sp, 16		
 
 		jr $ra
+
+
+#-----------------------------------------------
+#	copia_vetor_loop(*a0,*a1,a2) ->	$v0		    
+#	copia um vetor byte a byte para outro vetor 
+#												
+#   entradas:									
+#   $a0 endereço para o vetor de destino		
+#	$a1 endereço para o vetor de origem			
+#   $a2 tamanho do vetor 						
+#												
+#	saida:										
+#	$v0 contem o endereço para o destino		
+#-----------------------------------------------
+
+	.text
+	.globl copia_vetor
+
+
+copia_vetor:
+
+	addi $sp, $sp, -32
+	sw $ra, 28($sp)
+	sw $t0, 24($sp)
+
+	copia_vetor_loop:
+	
+		lw $t0, 0($a1)					#	carregando em t0 a palavra em vet2[i]  		   
+		sw $t0, 0($a0)					#	copiando em  vet1[i] o valor de vet2[i]		   
+		addi $a0, $a0, 4				#   incrementando a posição em vet1 em 1 palavra   
+		addi $a1, $a1, 4				#   incrementando a posição em vet2 em 1 palavra   
+		addi $a2, $a2, -1 				#   decrementando o contador					   
+		bnez $a2, copia_vetor_loop		#   se contador > 0 então continua o loop
+
+	lw $ra,28($sp)
+	lw $t0,24($sp)
+	addi $sp, $sp,32
+	jr  $ra
+
 
 #-------------------------------------------------------
 #	merge function									    
@@ -157,39 +253,10 @@ print_function:         #funcao simples que printa um array contido em $a0 de ta
 #														
 #-------------------------------------------------------
 
+	.text
+	.globl mergeSort
 
-copy_vector:  #copia n pisições de um vetor para outro vetor
-#parametros
-#a0 -   ponteiro para o vetor destino
-#a1 -   ponteiro para o vetor origem
-#a2 -   tamanho do vetor (n)
-#retorno
-#v0 -   ponteiro para o vetor destino
-
-  #empilha os registradores utilizados
-  addi $sp, $sp, -8   #"reserva" 2 bytes na pilha
-	sw $ra, 0($sp)
-	sw $t0, 4($sp)
-
-    copy_vector_loop:
-        lw $t0, 0($a1)  #carrega o numero da posição $a1 do vetor de origem para $t0
-        sw $t0, 0($a0)  #atribui o valor de $t0 para a posição $a0 do vetor destino
-        addi $a0, $a0, 4  #incrementa 4 pois é o tamanho de um inteiro
-        addi $a1, $a1, 4  #incrementa 4 pois é o tamanho de um inteiro
-        addi $a2, $a2, -1
-        bnez $a2, copy_vector_loop     #enquanto o vetor não for totalmente percorrido, ele continua copiando de $a1 para $a0
-
-	  #desempilha os registradores utilizados
-    lw $ra, 0($sp)
-    lw $t0, 4($sp)
-    addi $sp, $sp, 8   #"libera" 2 bytes na pilha
-    move $v0, $a0
-    jr $ra  #retorno
-
-
-#-------------------------------------------------------------------------------
-
-merge:
+mergeSort:
 
 	addi $sp,$sp, -24
 	sw $ra, 20($sp)
@@ -197,45 +264,44 @@ merge:
 	sw $t1, 12($sp)
 	sw $t2, 8($sp)
 	sw $t3, 4($sp)
-	sw $t4, 0($sp)
+	sw $t4, 0($sp)   			#	$t4 sera um registrador auxiliar					
 
 	li $t4,4
-	sub $t4, $a1, $t4
-	blez,$t4,bubble_merge  
-
-	move $t0,$a0  #endereço do inicio do primeiro vetor
+	sub $t4, $a1, $t4			#	Se o tamanho do vetor < 4, então chama o bubble 	
+	blez,$t4,bubble_merge       
 	
+	move $t0,$a0  				#	$t0 recebe endereço do inicio do primeiro vetor 	
 	li $t1,2
-	div $t1,$a1,$t1 #t1 recebendo o tamanho do primeiro vetor 
+	div $t1,$a1,$t1 			#	$t1 = $a1/2  (t1 recebe metade do tamanho do vetor)
 
 	li $t4,4
-	mul $t4,$t4,$t1
-	add $t2,$t0,$t4	#endereço do inicio do segundo vetor
+	mul $t4,$t4,$t1             #	$t4 = $t4*$t1 (manipulação palavra em bite) 		
+	add $t2,$t0,$t4				#	t2 recebe a posição do começo do segundo vetor      
 
-	sub $t3,$a1,$t1		
+	sub $t3,$a1,$t1				# 	$t3 = $a1 - $t1 (tamanho do segundo vetor)
 
-	move $a0,$t0
+	move $a0,$t0				#	setando os parametros e chamando mergeSort(0..mid-1)
 	move $a1,$t1
-	jal merge
+	jal mergeSort
 
-	move $a0,$t2
+	move $a0,$t2 				#	setando os parametros e chamando mergeSort(mid..fim)
 	move $a1,$t3
-	jal merge
+	jal mergeSort
 
- 	move $a0, $t0
+ 	move $a0, $t0 			    #	setando os parametros e chamando merge(t0,t1,t2,t3)
  	move $a1, $t1
     move $a2, $t2
     move $a3, $t3
 
-    jal mergeSort
+    jal merge
 
-	b endmerge
+	b endmergeSort
 
-		bubble_merge:
+		bubble_merge:			#   entra aqui quando o vetor for menor que 4
 
 			jal bubble
 
-	endmerge:
+	endmergeSort:
 	
 		lw $ra, 20($sp)
 		lw $t0, 16($sp)
@@ -248,7 +314,7 @@ merge:
 
 
 #-------------------------------------------------------
-#	mergeSort(a0,a1,a2,a3) 								
+#	merge(a0,a1,a2,a3) 								    
 #   faz a ordenação entre 2 vetores e retorna em um 	
 #   vetor só											
 #														
@@ -257,86 +323,86 @@ merge:
 #	$a1 é o tamanho do primeiro vetor					
 #   $a2 é o endereço para o começo do segundo vetor		
 #   $a3 é o tamanho do segundo vetor 					
-#	saidas:												
-#														
 #-------------------------------------------------------
 
+	.text
+	.globl merge
 
-mergeSort:
+
+merge:
 
 	addi $sp, $sp, -32
 	sw $ra,28($sp)
 	sw $t0,24($sp)
 	sw $t1,20($sp)
 	sw $t2,16($sp)
-	sw $t3,12($sp)
-	sw $t4,8($sp)
-	sw $t5,4($sp)
+	sw $t3,12($sp)		#	$t3 sera nosso vetor auxiliar
+	sw $t4,8($sp)		# 	$t4 variavel auxiliar
+	sw $t5,4($sp)		#	$t5 guarda o tamanho total (vet1 + vet2)
 	sw $a0,0($sp)	
 	
-	add $t5, $a1, $a3
+	add $t5, $a1, $a3 	#	$t5 recebe a soma dos tamanhos de vet1 e vet2
 	
 	li $t0,4
+	mul $a1, $a1, $t0   #	$a1 recebe o tamanho em bytes(palavras)      
+	add $a1, $a0, $a1   #	$a1 recebe a posicao do meio (para comparar) 
 
-	mul $a1, $a1, $t0
-	add $a1, $a0, $a1
+	mul $a3, $a3, $t0   
+	add $a3, $a2, $a3   #	$a3 recebe a posição do fim (para comparar)  
 
-	mul $a3, $a3, $t0
-	add $a3, $a2, $a3
-
-	lw $t3, vetor_tmp
+	lw $t3, vetor_tmp	
 	
-	lw $t1,($a0)
-	lw $t2,($a2)
+	lw $t1,($a0)		# 	carrega para $t1 o valor em vet1[posicao]
+	lw $t2,($a2)        #   careega para $t2 o valor em vet2[posicao]
 
-	mergeSort_loop:	
+	merge_loop:	
 
-		beq $a0, $a1,preenche_temp_v1
-		beq $a2, $a3,preenche_temp_v2
+		beq $a0, $a1,preenche_temp_v1	#	se o vet1 chegou ao fim
+		beq $a2, $a3,preenche_temp_v2   #	se o vet2 chegou ao fim
 
-		sub $t0, $t1, $t2
-		bgtz $t0, v2maior
+		sub $t0, $t1, $t2               
+		bgtz $t0, v2maior				#	compara se vet1[a0] > vet2[a2]	    
 
-		sw   $t1, ($t3)
-		addi $a0, $a0,4
-		addi $t3, $t3,4
-		lw 	 $t1, ($a0)
-		b mergeSort_loop
+		sw   $t1, ($t3)					# 	copia de vet1 para vetAux 			
+		addi $a0, $a0,4					#   incrementa uma posição(word) em $a0 
+		addi $t3, $t3,4					#   incrementa uma posição(word) em $t3 
+		lw 	 $t1, ($a0)					#   pega o novo valor de vet1			
+		b merge_loop
 		
-		v2maior:
+		v2maior:						#	quando vet2[a2] > vet1				
 
-			sw 	 $t2, ($t3)
-			addi $a2, $a2, 4
-			addi $t3, $t3, 4
-			lw   $t2, ($a2)
-			b mergeSort_loop
+			sw 	 $t2, ($t3)				#	carrega de vet2 para vetAux			
+			addi $a2, $a2, 4			#   incrementa uma posição(word) em $a2 
+			addi $t3, $t3, 4			#   incrementa uma posição(word) em $t3 
+			lw   $t2, ($a2)				#   pega o novo valor em vet2
+			b merge_loop
 
-		preenche_temp_v1:
-
+		preenche_temp_v1:				#	quando não há mais nada no vet1 	
+										#   preenche com o vet2					
 			sw $t2,($t3)
 			addi $a2, $a2, 4
 	        addi $t3, $t3, 4
-			beq $a2, $a3,mergeSort_fim
+			beq $a2, $a3,merge_fim
 			lw $t2,($a2)
 			b preenche_temp_v1
 		
-		preenche_temp_v2:
-
+		preenche_temp_v2:				#	quando não há mais nada no vet2 	
+										#	preenche com o vet1			    	
 			sw $t1,($t3)
 			addi $a0, $a0, 4
 			addi $t3, $t3, 4
-			beq $a0, $a1, mergeSort_fim	
+			beq $a0, $a1, merge_fim	
 			lw $t1,($a0)
 			b preenche_temp_v2
 
 
-		mergeSort_fim:
+		merge_fim:
 
-			lw $a0, 0($sp)
+			lw $a0, 0($sp)				#	copia do vetor auxiliar para o nosso vetor original
 			lw $a1, vetor_tmp
 			move $a2, $t5
 
-			jal copy_vector
+			jal copia_vetor_loop	   
 
 			lw $ra,28($sp)
 			lw $t0,24($sp)
