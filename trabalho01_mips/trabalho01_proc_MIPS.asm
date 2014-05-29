@@ -7,7 +7,7 @@
 #																	   
 
 
-#-------------------------------------------
+#------------------------------------------
 # LABELS     								
 #-------------------------------------------
 
@@ -19,9 +19,9 @@ espaco: 	.asciiz   " "
 pulalinha:  .asciiz   "\n"
 
 	.align 2
-size:		.word	  16
-list:   	.word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68
-list_old:   .word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68
+size:		.word	  17
+list:   	.word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68,12
+list_old:   .word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68,12
 vetor_tmp:  .word     1
 
 
@@ -56,7 +56,8 @@ main:
     lw $a0, size
     li $t7, 4
     mul $a0, $a0, $t7
-    syscall     
+    syscall         
+
     sw $v0,vetor_tmp     
 
 	#passando os parametros e chamando merge
@@ -108,7 +109,7 @@ bubble:
 	sw $s3,12($sp)					# 	$s3 recebera o tamanho				
 	
 	move $s3,$a1					#   copia para $s3 o tamanho do vetor       
-	add $s3,$s3,-1                  #	decrementa o tamanho pois fara i-1 vezes
+	add $s3,$s3,-1                 #	decrementa o tamanho pois fara i-1 vezes
 
 	li $s2, 0						#   setando o contador j para 0
 	outer: 							#   loop externo
@@ -266,8 +267,8 @@ mergeSort:
 	sw $t3, 4($sp)
 	sw $t4, 0($sp)   			#	$t4 sera um registrador auxiliar					
 
-	li $t4,4
-	sub $t4, $a1, $t4			#	Se o tamanho do vetor < 4, então chama o bubble 	
+	li $t4,1
+    sub $t4, $a1, $t4			#	Se o tamanho do vetor < 4, então chama o bubble 	
 	blez,$t4,bubble_merge       
 	
 	move $t0,$a0  				#	$t0 recebe endereço do inicio do primeiro vetor 	
@@ -275,7 +276,7 @@ mergeSort:
 	div $t1,$a1,$t1 			#	$t1 = $a1/2  (t1 recebe metade do tamanho do vetor)
 
 	li $t4,4
-	mul $t4,$t4,$t1             #	$t4 = $t4*$t1 (manipulação palavra em bite) 		
+	mul $t4,$t4,$t1             #	$t4 = tamanho do vetor em bytes		
 	add $t2,$t0,$t4				#	t2 recebe a posição do começo do segundo vetor      
 
 	sub $t3,$a1,$t1				# 	$t3 = $a1 - $t1 (tamanho do segundo vetor)
@@ -292,14 +293,14 @@ mergeSort:
  	move $a1, $t1
     move $a2, $t2
     move $a3, $t3
-
+    
     jal merge
 
 	b endmergeSort
 
 		bubble_merge:			#   entra aqui quando o vetor for menor que 4
 
-			jal bubble
+			#jal bubble
 
 	endmergeSort:
 	
@@ -343,12 +344,13 @@ merge:
 	
 	add $t5, $a1, $a3 	#	$t5 recebe a soma dos tamanhos de vet1 e vet2
 	
-	li $t0,4
+	li $t0,4            # 	fator multiplicativo p/ palavra(word)
+	
 	mul $a1, $a1, $t0   #	$a1 recebe o tamanho em bytes(palavras)      
-	add $a1, $a0, $a1   #	$a1 recebe a posicao do meio (para comparar) 
+	add $a1, $a0, $a1   #	$a1 recebe o endereço do meio 
 
 	mul $a3, $a3, $t0   
-	add $a3, $a2, $a3   #	$a3 recebe a posição do fim (para comparar)  
+	add $a3, $a3, $a2   #	$a3 recebe o endereço do fim
 
 	lw $t3, vetor_tmp	
 	
