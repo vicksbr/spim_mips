@@ -19,8 +19,8 @@ espaco: 	.asciiz   " "
 pulalinha:  .asciiz   "\n"
 
 	.align 2
-size:		.word	  17
-list:   	.word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68,12
+size:		.word	  8
+list:   	.word     13,23,2,17,5,11,19,3
 list_old:   .word     13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68,12
 vetor_tmp:  .word     1
 
@@ -296,6 +296,15 @@ mergeSort:
     
     jal merge
 
+	la $a0, list
+	lw $a1, size		
+	jal print_function		
+
+	li $v0,4
+	la $a0,pulalinha
+	syscall
+
+
 	b endmergeSort
 
 		bubble_merge:			#   entra aqui quando o vetor for menor que 4
@@ -322,8 +331,8 @@ mergeSort:
 #	entradas:											
 #	$a0 é o endereço para o começo do vetor				
 #	$a1 é o tamanho do primeiro vetor					
-#   $a2 é o endereço para o começo do segundo vetor		
-#   $a3 é o tamanho do segundo vetor 					
+#   $a2 é o endereço para o começo da segunda parte do vetor		
+#   $a3 é o tamanho da segunda parte do vetor 					
 #-------------------------------------------------------
 
 	.text

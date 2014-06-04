@@ -11,11 +11,11 @@ msg_n_ordenado: .asciiz "Vetor nao ordenado: "
 pula_linha:		.asciiz "\n"
 espaco: 		.asciiz " "
 
-tam_vetor: 		.word 	8
-lista:			.word 	13,23,2,17,5,11,19,3
+tam_vetor: 		.word 	16
+lista:			.word 	13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68,12
 lista_original: .word 	13,23,2,17,5,11,19,3,29,1,15,98,89,37,77,68,12
 
-vet_temp:		.space 	8
+vet_temp:		.space 	16
 
 
 	.text
@@ -133,10 +133,8 @@ copia_vetor:
 
 	lw $ra, 0($sp)
 	lw $t0, 4($sp)
-	addi $sp, $sp,-8
+	addi $sp, $sp,8
 	jr $ra
-
-end_copia_vetor:
 
 
 bubble_sort:
@@ -221,7 +219,7 @@ mergeSort:
 	move $t1, $a1
 	
 	li $t4,1
-    sub $t4, $a1, $t4			#	Se o tamanho do vetor < 4, então chama o bubble 	
+    sub $t4, $a1, $t4	   #Se o tamanho do vetor < 4, então chama o bubble 	
 	blez,$t4,bubble_merge       
 
 	li $t1, 2
@@ -276,17 +274,19 @@ mergeSort:
 
 merge:
 
-	addi $sp, $sp, -32
-	sw $ra,28($sp)
+	addi $sp, $sp, -40
+	sw $ra,36($sp)
+	sw $t6,32($sp)
+	sw $t7,28($sp)
 	sw $t0,24($sp)
 	sw $t1,20($sp)
 	sw $t2,16($sp)
-	sw $t3,12($sp)		#	$t3 sera nosso vetor auxiliar
+	sw $t8,12($sp)		#	$t3 sera nosso vetor auxiliar
 	sw $t4,8($sp)		
 	sw $t5,4($sp)		
 	sw $a0,0($sp)	
 	
-	la $t3,vet_temp
+	la $t8,vet_temp
 
 	li $t4,0 		  #i = 0
 	move $t5,$a1 	  #meio = tamanho
@@ -306,18 +306,18 @@ merge:
 		sub $t0, $t1, $t2               
 		bgtz $t0, v2maior				#	compara se vet1[a0] > vet2[a2]	    
 
-		sw   $t1, ($t3)					# 	copia de vet1 para vetAux 			
+		sw   $t1, ($t8)					# 	copia de vet1 para vetAux 			
 		addi $a0, $a0,4					#   incrementa uma posição(word) em $a0 
-		addi $t3, $t3,4					#   incrementa uma posição(word) em $t3 
+		addi $t8, $t8,4					#   incrementa uma posição(word) em $t3 
 		addi $t4, $t4,1 #i++
 	
 		b merge_loop
 
       	v2maior:						#	quando vet2[a2] > vet1				
 
-			sw 	 $t2, ($t3)				#	carrega de vet2 para vetAux			
+			sw 	 $t2, ($t8)				#	carrega de vet2 para vetAux			
 			addi $a2, $a2, 4			#   incrementa uma posição(word) em $a2 
-			addi $t3, $t3, 4			#   incrementa uma posição(word) em $t3 
+			addi $t8, $t8, 4			#   incrementa uma posição(word) em $t3 
 			addi $t6, $t6, 1 #j++
 	
 			b merge_loop	  
@@ -330,9 +330,9 @@ merge:
 	#if i == meio, preenche com j, else preenche com i
 	bne $t4,$t5,preenche_p2
 
-	sw $t2,($t3)
+	sw $t2,($t8)
 	addi $a2, $a2, 4
-    addi $t3, $t3, 4
+    addi $t8, $t8, 4
 	addi $t6, $t6, 1 #j++
 	beq $t6, $t7, merge_fim
 	lw $t2,($a2)
@@ -340,9 +340,9 @@ merge:
 	
 	#else
 	preenche_p2:
-		sw $t1,($t3)
+		sw $t1,($t8)
 		addi $a0, $a0, 4
-		addi $t3, $t3, 4
+		addi $t8, $t8, 4
 		addi $t4, $t4,1 #i++
 		beq $t4, $t5, merge_fim	
 		lw $t1,($a0)
@@ -350,15 +350,21 @@ merge:
 
 	merge_fim:
 
-		lw $ra,28($sp)
+		lw $a0,0($sp)
+		la $a1,vet_temp
+		move $a2,$t7
+		jal copia_vetor	
+
+		lw $ra,36($sp)
+		lw $t6,32($sp)
+		lw $t7,28($sp)
 		lw $t0,24($sp)
 		lw $t1,20($sp)
 		lw $t2,16($sp)
-		lw $t3,12($sp)
+		lw $t8,12($sp)
 		lw $t4,8($sp)
 		lw $t5,4($sp)
-		lw $a0, 0($sp)	
-		addi $sp, $sp, 32
+		addi $sp, $sp, 40
 
 		jr $ra
 
