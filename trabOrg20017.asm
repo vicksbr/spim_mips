@@ -1,49 +1,54 @@
 .data
 
 hash:  .space 64 #vetor da tabela hash que recebera os ponteiros pra cada lista
-tam:   .word  16   #numero de posicoes
+tam:   .word  16 #numero de posicoes
 esp:   .asciiz " "
 sep:   .asciiz "-"
 pula:  .asciiz "\n"
+
+menu:  .asciiz "Hash Table para Mips\nDigite sua opção\n1-inserir 2-buscar 3-remover 4-listar\n"
+
+
+
 .text
 .globl main
 
 main: 					
-	
 	la $a0,hash
 	jal criaLista
 
-	la $a0,hash
-	li $a1,1
-	jal adicionaNoComeco
-	
-	la $a0,hash
-	li $a1,2
-	jal adicionaNoComeco
-	
-	la $a0,hash
-	li $a1,3
-	jal adicionaNoComeco
-	
-	la $a0,hash
-	li $a1,4
-	jal adicionaNoComeco
+	li $a0,20
+	jal funcaoHash
 
-	addi,$a0,$a0,4
-	li $a1,5
-	jal adicionaNoComeco
-	
-	
-	li $a1,6
-	jal adicionaNoComeco
+	li $a0,20
+	jal funcaoHash
 
-	addi $a0,$a0,4
-	li $a1,7
-	jal adicionaNoComeco
+inicioprograma:
 
+	li $v0,4
+	la $a0,menu
+	syscall
+		
+	li $v0,5
+	syscall
+	
+	beq $v0,$zero,fimprograma
+	
+	li $t6,1
+        beq $v0,$t6,fimprograma
+	
+	li $t6,2
+        beq $v0,$t6,fimprograma
+	
+	li $t6,3
+        beq $v0,$t6,fimprograma
+	
+	li $t6,4
 	la $a0,hash
-	jal imprimeHash
-
+    	beq $v0,$t6,imprimeHash #se a opcao digitada for 1
+	j inicioprograma											
+	
+fimprograma:
 	li $v0,10
 	syscall
 
@@ -53,7 +58,6 @@ criaNo:
 	sw $ra,0($sp)
 	sw $a0,4($sp)
 
-	
 	li $a0,12
 	li $v0,9
 	syscall		
@@ -67,7 +71,8 @@ criaNo:
 	
 	
 criaLista:
-	addi $t7,$t7,0
+	
+	addi $t7,$t7,-1  #valor imicializador
 	addi $sp,$sp,-8
 	sw $ra,0($sp)
 	sw $a0,4($sp)
@@ -97,6 +102,9 @@ fimloop:
 # adicionaNo(posicaoNaHash,valor)
 #	
 
+# parametros entrada $a0 endereço da cabeça 
+# adicionanumero 
+#
 
 adicionaNoComeco: 
 
@@ -104,6 +112,11 @@ adicionaNoComeco:
 	sw $ra,0($sp)
 	sw $a0,4($sp)
 	sw $a1,8($sp)
+	
+	#
+	# logica pro primeiro no
+	#
+	
 	
 	jal criaNo
 	
@@ -150,7 +163,7 @@ fimImprime:
 	lw $a0,4($sp)
 	addi,$sp,$sp,8
 
-	jr $ra
+	jr $ra #*********************
 
 imprimeListaUnica:
 
@@ -180,3 +193,31 @@ fimlooplista:
 	addi,$sp,$sp,8
 
 	jr $ra
+
+
+#
+# funcaoHash(num) parametro entrada $a0 = numero
+#	          parametro saida  
+funcaoHash: 
+
+	addi $sp,$sp,-8
+	sw $a0,0($sp)
+	sw $ra,4($sp)
+	
+	move $t3,$a0
+	lw $t4,tam
+	
+	div $t3,$t4
+	mfhi $t5 #resto da divisao, ou seja, em qual posição do vetor hash inserir o numero
+
+	mul $t5,$t5,4
+	la $a0,hash
+	add $a0,$a0,$t5
+	move $a1,$t3	
+	jal adicionaNoComeco 
+	
+	lw $a0,0($sp)
+	lw $ra,4($sp)
+	addi $sp,$sp,8
+	
+	jr $ra	
