@@ -9,6 +9,7 @@ inicial:   .asciiz "Univerisade de São Paulo -Hash Table para Mips 2017\n"
 menu:      .asciiz "Opções 1-inserir 2-buscar 3-remover 4-listar\n"
 strinsere: .asciiz "Digite o numero: "
 sucesso:   .asciiz "***No inserido com sucesso\n"
+fracasso:  .asciiz "***O no inserido ja existe\n"
 achado:    .asciiz "***O numero foi encontrado\n"
 nachado:   .asciiz "***O numero nao foi encontrado\n"
 .text
@@ -217,15 +218,11 @@ funcaoHash:
 	sw $ra,4($sp)
 	
 	move $t3,$a0
+	jal buscarHash
 	
-	la $a0,strinsere
-	li $v0,4	
-	syscall
-	li $v0,5
-	syscall
-	move $t3,$v0	
-	lw $t4,tam
-	
+	li $t0,1
+	beq $v0,$t0,jaexiste
+			
 	div $t3,$t4
 	mfhi $t5 #resto da divisao, ou seja, em qual posição do vetor hash inserir o numero
 
@@ -234,7 +231,15 @@ funcaoHash:
 	add $a0,$a0,$t5
 	move $a1,$t3	
 	jal adicionaNoComeco 
-	
+	j fimuncaohash
+		
+jaexiste:
+	la $a0,fracasso
+	li $v0,4
+	syscall
+	jal fimuncaohash
+
+fimuncaohash:	
 	lw $a0,0($sp)
 	lw $ra,4($sp)
 	addi $sp,$sp,8
@@ -284,11 +289,13 @@ achou:
 	la $a0,achado
 	li $v0,4
 	syscall
+	li $v0,1 #setando o retorno da funcao pra 1 (achou!!)
 	j fimbusca
 naoachou:
 	la $a0,nachado
 	li $v0,4
 	syscall
+	li $v0,0 #setando o retorno da funcao pra 0 (nao achou)
 	j fimbusca
 
 fimbusca:		
