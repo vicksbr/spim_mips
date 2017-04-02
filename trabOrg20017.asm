@@ -1,14 +1,14 @@
 .data
 
-hash:  .space 64 #vetor da tabela hash que recebera os ponteiros pra cada lista
-tam:   .word  16 #numero de posicoes
-esp:   .asciiz " "
-sep:   .asciiz "-"
-pula:  .asciiz "\n"
+hash:      .space 64 #vetor da tabela hash que recebera os ponteiros pra cada lista
+tam:       .word  16 #numero de posicoes
+esp:       .asciiz " "
+sep:       .asciiz "-"
+pula:      .asciiz "\n"
 
-menu:  .asciiz "Hash Table para Mips\nDigite sua opção\n1-inserir 2-buscar 3-remover 4-listar\n"
-
-
+menu:      .asciiz "Hash Table para Mips\nDigite sua opção\n1-inserir 2-buscar 3-remover 4-listar\n"
+strinsere: .asciiz "Digite o numero: "
+sucesso:   .asciiz "No inserido com sucesso\n"
 
 .text
 .globl main
@@ -17,11 +17,6 @@ main:
 	la $a0,hash
 	jal criaLista
 
-	li $a0,20
-	jal funcaoHash
-
-	li $a0,20
-	jal funcaoHash
 
 inicioprograma:
 
@@ -35,7 +30,7 @@ inicioprograma:
 	beq $v0,$zero,fimprograma
 	
 	li $t6,1
-        beq $v0,$t6,fimprograma
+        beq $v0,$t6,funcaoHash
 	
 	li $t6,2
         beq $v0,$t6,fimprograma
@@ -113,11 +108,11 @@ adicionaNoComeco:
 	sw $a0,4($sp)
 	sw $a1,8($sp)
 	
-	#
-	# logica pro primeiro no
-	#
-	
-	
+
+	lw $t5,0($a0)
+	lw $t9,4($t5)
+	ble $t9,$zero,primeiro
+
 	jal criaNo
 	
 	#$v0 endreco do novo nó
@@ -128,8 +123,19 @@ adicionaNoComeco:
 	sw $t5,8($v0)   #salva para o novo ponteiro o rabo do ponteiro anterior
 	sw $v0,0($t5) 
 	sw $v0,($a0)    #aponta a cabeca para o novo vetor 
+	la $a0,sucesso
+	li $v0,4
+
+	j fimadiciona
 	
-		
+primeiro:
+	
+	sw $a1,4($t5)
+	la $a0,sucesso
+	li $v0,4
+	syscall
+fimadiciona:
+
 	lw $ra,0($sp)
 	lw $a0,4($sp)
 	lw $a1,8($sp)
@@ -163,7 +169,7 @@ fimImprime:
 	lw $a0,4($sp)
 	addi,$sp,$sp,8
 
-	jr $ra #*********************
+	jr $ra
 
 imprimeListaUnica:
 
@@ -196,8 +202,8 @@ fimlooplista:
 
 
 #
-# funcaoHash(num) parametro entrada $a0 = numero
-#	          parametro saida  
+# 
+#	          
 funcaoHash: 
 
 	addi $sp,$sp,-8
@@ -205,6 +211,13 @@ funcaoHash:
 	sw $ra,4($sp)
 	
 	move $t3,$a0
+	
+	la $a0,strinsere
+	li $v0,4	
+	syscall
+	li $v0,5
+	syscall
+	move $t3,$v0	
 	lw $t4,tam
 	
 	div $t3,$t4
@@ -221,3 +234,6 @@ funcaoHash:
 	addi $sp,$sp,8
 	
 	jr $ra	
+
+
+	
