@@ -5,15 +5,21 @@ tam:       .word  16 #numero de posicoes
 esp:       .asciiz " "
 sep:       .asciiz "-"
 pula:      .asciiz "\n"
-
-menu:      .asciiz "Hash Table para Mips\nDigite sua opção\n1-inserir 2-buscar 3-remover 4-listar\n"
+inicial:   .asciiz "Univerisade de São Paulo -Hash Table para Mips 2017\n"
+menu:      .asciiz "Opções 1-inserir 2-buscar 3-remover 4-listar\n"
 strinsere: .asciiz "Digite o numero: "
-sucesso:   .asciiz "No inserido com sucesso\n"
-
+sucesso:   .asciiz "***No inserido com sucesso\n"
+achado:    .asciiz "***O numero foi encontrado\n"
+nachado:   .asciiz "***O numero nao foi encontrado\n"
 .text
 .globl main
 
 main: 					
+	
+	la $a0,inicial
+	li $v0,4
+	syscall
+
 	la $a0,hash
 	jal criaLista
 
@@ -33,7 +39,7 @@ inicioprograma:
         beq $v0,$t6,funcaoHash
 	
 	li $t6,2
-        beq $v0,$t6,fimprograma
+        beq $v0,$t6,buscarHash
 	
 	li $t6,3
         beq $v0,$t6,fimprograma
@@ -236,4 +242,61 @@ funcaoHash:
 	jr $ra	
 
 
+buscarHash:
 	
+	addi $sp,$sp,-8
+	sw $a0,0($sp)
+	sw $ra,4($sp)
+	
+	la $a0,strinsere
+	li $v0,4	
+	syscall
+	li $v0,5
+	syscall
+	
+	move $t3,$v0 # contem o numero a ser buscado
+	lw   $t4,tam
+	
+	div  $t3,$t4
+	mfhi $t5 #resto da divisao, ou seja, em qual posição do vetor hash inserir o numero
+
+	mul $t5,$t5,4 #calcula a posicao certa dentro do vetor de ponteiros hash
+
+	la $t6,hash
+	add $t6,$t6,$t5 #aponta para a cabeça do ponteiro na posicao correta
+	lw $s0,0($t6)
+loopbusca:	
+	
+	beqz $s0,naoachou
+
+	lw $a0,4($s0)
+	beq $a0,$t3,achou
+			
+	lw $s0,8($s0)
+
+	la $a0,sep
+	li $v0,4
+	syscall
+	j loopbusca
+
+
+achou:
+	la $a0,achado
+	li $v0,4
+	syscall
+	j fimbusca
+naoachou:
+	la $a0,nachado
+	li $v0,4
+	syscall
+	j fimbusca
+
+fimbusca:		
+	lw $a0,0($sp)
+	lw $ra,4($sp)
+	addi $sp,$sp,8
+	
+	jr $ra	
+
+		
+		
