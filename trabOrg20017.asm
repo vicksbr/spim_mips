@@ -9,10 +9,10 @@ inicial:   .asciiz "Univerisade de São Paulo -Hash Table para Mips 2017\n"
 menu:      .asciiz "Opções 1-inserir 2-buscar 3-remover 4-listar: "
 strinsere: .asciiz "Digite o numero: "
 sucesso:   .asciiz "***No inserido com sucesso\n"
-fracasso:  .asciiz "***O no inserido ja existe\n"
+fracasso:  .asciiz "***O no inserido ja existe ou negativo\n"
 achado:    .asciiz "***O numero foi encontrado\n"
 nachado:   .asciiz "***O numero nao foi encontrado\n"
-
+negativo:  .asciiz "Numero negativo invalido\n"
 .text
 .globl main
 
@@ -236,6 +236,9 @@ funcaoHash:
 	
 	li   $t0,1
 	beq  $v0,$t0,jaexiste
+	
+	li   $t0,-1
+	beq  $v0,$t0,jaexiste
 			
 	div  $t3,$t4
 	mfhi $t5 #resto da divisao, ou seja, em qual posição do vetor hash inserir o numero
@@ -279,7 +282,10 @@ buscarHash:
 
 	li $v0,5
 	syscall
-
+	
+	blt  $v0,$zero,nr_negativo
+		
+						
 	move $t3,$v0     # contem o numero a ser buscado
 	lw   $t4,tam
 	
@@ -319,6 +325,14 @@ naoachou:
 	li $v0,0 #setando o retorno da funcao pra 0 (nao achou)
 	j fimbusca
 
+nr_negativo:
+
+	la $a0,negativo
+	li $v0,4
+	syscall
+	li $v0,-1
+        j fimbusca
+
 fimbusca:		
 
 	lw   $a0,0($sp)
@@ -340,6 +354,9 @@ removeHash:
 	
 	jal buscarHash
 	
+	li $t7,-1
+	beq $v0,$t7,nr_negativo_encontrado
+	li $t7,0
 	beq $v0,$zero,nr_nao_encontrado
 
 	move $t0,$v1 #endereço do nó a ser deletado
@@ -391,6 +408,9 @@ nr_nao_encontrado:
 	li $v0,4
 	la $a0,nachado
 	syscall
+	j fimremoveHash
+
+nr_negativo_encontrado:
 	j fimremoveHash
 
 fimremoveHash:	
