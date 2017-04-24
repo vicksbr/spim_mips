@@ -1,3 +1,11 @@
+# Grupo 11 
+
+# 7563881 Henrique Bruni Calunga
+# 9791069 Marcel Otoboni de Lima
+# 7143527 Monica Colacique
+# 6513497 Pedro Naidhig Puzzi
+
+
 .data
 
 hash:      .space 64 #vetor da tabela hash que recebera os ponteiros pra cada lista
@@ -6,7 +14,7 @@ esp:       .asciiz " "
 sep:       .asciiz "-"
 pula:      .asciiz "\n"
 inicial:   .asciiz "Univerisade de São Paulo -Hash Table para Mips 2017\n"
-menu:      .asciiz "Opções 1-inserir 2-buscar 3-remover 4-listar: "
+menu:      .asciiz "Opções 1-inserir 2-buscar 3-remover 4-listar ou -1 para sair: "
 strinsere: .asciiz "Digite o numero: "
 sucesso:   .asciiz "***No inserido com sucesso\n"
 fracasso:  .asciiz "***O no inserido ja existe ou negativo\n"
@@ -52,6 +60,9 @@ inicioprograma:
 	la  $a0,hash    
 	beq $v0,$t6,imprimeHash 
 
+	li $t6,-1
+	j fimprograma
+		
 	j inicioprograma											
 	
 fimprograma:
